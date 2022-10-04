@@ -15,10 +15,10 @@ resource snowflake_warehouse WAREHOUSE {
 }
 
 resource "snowflake_warehouse_grant" "WAREHOUSE_GRANT" {
+  for_each = var.role_grants
+
   warehouse_name = snowflake_warehouse.WAREHOUSE.name
-  privilege      = "USAGE"
-
-  roles = var.roles
-
+  privilege      = each.key
+  roles = each.value
   with_grant_option = var.with_grant_option
 }

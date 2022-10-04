@@ -149,9 +149,10 @@ module WH_SMALL_MARKETING {
   warehouse_name = "WH_SMALL_MARKETING"
   warehouse_comment = "Small warehouse for marketers."
   warehouse_size = "SMALL"
-  roles = [
-    snowflake_role.RL_MARKETING.name
-  ]
+  role_grants = {
+    "OWNERSHIP" = [snowflake_role.RL_MARKETING.name],
+    "USAGE" = [snowflake_role.RL_MARKETING.name]
+  }
   with_grant_option = false
 }
 

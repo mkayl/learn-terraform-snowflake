@@ -16,8 +16,8 @@ variable "auto_suspend" {
   default = 60
 }
 
-variable "roles" {
-  type = set(string)
+variable "role_grants" {
+  type = map(any)
 }
 
 variable "with_grant_option" {
