@@ -144,6 +144,17 @@ resource snowflake_warehouse WH_XSMALL_MARKETING {
   auto_suspend = 60
 }
 
+module WH_SMALL_MARKETING {
+  source = "./warehouse"
+  warehouse_name = "WH_SMALL_MARKETING"
+  warehouse_comment = "Small warehouse for marketers."
+  warehouse_size = "SMALL"
+  roles = [
+    snowflake_role.RL_MARKETING.name
+  ]
+  with_grant_option = false
+}
+
 resource snowflake_warehouse WH_MEDIUM_MARKETING {
   name           = "WH_MEDIUM_MARKETING"
   comment        = "A medium warehouse for the marketing team."
