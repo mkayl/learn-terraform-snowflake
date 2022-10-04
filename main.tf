@@ -22,22 +22,22 @@ resource snowflake_database TEST_TERRAFORM_DB {
 }
 
 resource snowflake_schema ADS {
-  database = "TEST_TERRAFORM_DB"
+  database = snowflake_database.TEST_TERRAFORM_DB.name
   name = "ADS"
   comment = "A schema for understanding ads thet were run"
   data_retention_days = 1
 }
 
 resource snowflake_schema SALES {
-  database = "TEST_TERRAFORM_DB"
+  database = snowflake_database.TEST_TERRAFORM_DB.name
   name = "SALES"
   comment = "A schema for understanding ads thet were run"
   data_retention_days = 1
 }
 
 resource "snowflake_table" "FACEBOOK_ADS" {
-  database            = "TEST_TERRAFORM_DB"
-  schema              = "ADS"
+  database            = snowflake_database.TEST_TERRAFORM_DB.name
+  schema              = snowflake_schema.ADS.name
   name                = "FACEBOOK_ADS"
   comment             = "Table to track ads success."
   data_retention_days = 1
@@ -67,8 +67,8 @@ resource "snowflake_table" "FACEBOOK_ADS" {
 }
 
 resource snowflake_view AGG_FACEBOOK_ADS {
-  database = "TEST_TERRAFORM_DB"
-  schema   = "ADS"
+  database = snowflake_database.TEST_TERRAFORM_DB.name
+  schema   = snowflake_schema.ADS.name
   name     = "AGG_FACEBOOK_ADS"
 
   comment = "Aggregated facebook ads by date"
@@ -79,8 +79,8 @@ SQL
 }
 
 resource "snowflake_table" "TBL_EMPLOYEES" {
-  database            = "TEST_TERRAFORM_DB"
-  schema              = "SALES"
+  database            = snowflake_database.TEST_TERRAFORM_DB.name
+  schema              = snowflake_schema.SALES.name
   name                = "EMPLOYEES"
   comment             = "Table containing all employees."
   data_retention_days = 1
@@ -104,8 +104,8 @@ resource "snowflake_table" "TBL_EMPLOYEES" {
 }
 
 resource snowflake_view CURRENT_EMPLOYEES {
-  database = "TEST_TERRAFORM_DB"
-  schema   = "SALES"
+  database = snowflake_database.TEST_TERRAFORM_DB.name
+  schema   = snowflake_schema.SALES.name
   name     = "CURRENT_EMPLOYEES"
 
   comment = "Returns all current employees"
@@ -128,7 +128,7 @@ resource snowflake_user TEST_TERRAFORM_USER_1 {
   disabled     = false
   display_name = "Snowflake User"
 
-  default_warehouse = "wh_xsmall_marketing"
+  default_warehouse = snowflake_warehouse.WH_XSMALL_MARKETING.name
   default_role      = "public"
 }
 
@@ -164,77 +164,77 @@ resource "snowflake_warehouse" WH_XSMALL_SALES {
 }
 
 resource "snowflake_role_grants" "MARKETING_GRANTS" {
-  role_name = "RL_MARKETING"
+  role_name = snowflake_role.RL_MARKETING.name
 
   roles = [
     "ACCOUNTADMIN"
   ]
 
   users = [
-    "TEST_TERRAFORM_USER_1"
+    snowflake_user.TEST_TERRAFORM_USER_1.name
   ]
 }
 
 resource snowflake_warehouse_grant "WH_XSMALL_MARKETING_USAGE_GRANT" {
-  warehouse_name = "WH_XSMALL_MARKETING"
+  warehouse_name = snowflake_warehouse.WH_XSMALL_MARKETING.name
   privilege      = "USAGE"
 
   roles = [
-    "RL_MARKETING",
+    snowflake_role.RL_MARKETING.name,
   ]
 
   with_grant_option = false
 }
 
 resource snowflake_warehouse_grant "WH_MEDIUM_MARKETING_USAGE_GRANT" {
-  warehouse_name = "WH_MEDIUM_MARKETING"
+  warehouse_name = snowflake_warehouse.WH_MEDIUM_MARKETING.name
   privilege      = "USAGE"
 
   roles = [
-    "RL_MARKETING",
+    snowflake_role.RL_MARKETING.name,
   ]
 
   with_grant_option = false
 }
 
 resource snowflake_database_grant "TEST_TERRAFORM_DB_GRANT" {
-  database_name = "TEST_TERRAFORM_DB"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
 
   privilege = "USAGE"
-  roles     = ["RL_MARKETING", "RL_SALES"]
+  roles     = [snowflake_role.RL_MARKETING.name, snowflake_role.RL_SALES.name]
 
   with_grant_option = false
 }
 
 resource snowflake_schema_grant "ADS_USAGE_GRANT" {
-  database_name = "TEST_TERRAFORM_DB"
-  schema_name   = "ADS"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
+  schema_name   = snowflake_schema.ADS.name
 
   privilege = "USAGE"
-  roles     = ["RL_MARKETING"]
+  roles     = [snowflake_role.RL_MARKETING.name]
 
   with_grant_option = false
 }
 
 resource snowflake_table_grant FACEBOOK_ADS_SELECT_GRANT {
-  database_name = "TEST_TERRAFORM_DB"
-  schema_name   = "ADS"
-  table_name    = "FACEBOOK_ADS"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
+  schema_name   = snowflake_schema.ADS.name
+  table_name    = snowflake_table.FACEBOOK_ADS.name
 
   privilege = "SELECT"
-  roles     = ["RL_MARKETING"]
+  roles     = [snowflake_role.RL_MARKETING.name]
 
   with_grant_option = false
 }
 
 resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
-  database_name = "TEST_TERRAFORM_DB"
-  schema_name   = "ADS"
-  view_name     = "AGG_FACEBOOK_ADS"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
+  schema_name   = snowflake_schema.ADS.name
+  view_name     = snowflake_view.AGG_FACEBOOK_ADS.name
 
   privilege = "SELECT"
   roles = [
-    "RL_MARKETING"
+    snowflake_role.RL_MARKETING.name
   ]
 
   with_grant_option = false
@@ -243,57 +243,57 @@ resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
 
 
 resource "snowflake_role_grants" "SALES_GRANTS" {
-  role_name = "RL_SALES"
+  role_name = snowflake_role.RL_SALES.name
 
   roles = [
     "ACCOUNTADMIN"
   ]
 
   users = [
-    "TEST_TERRAFORM_USER_1"
+    snowflake_user.TEST_TERRAFORM_USER_1.name
   ]
 }
 
 resource snowflake_warehouse_grant "WH_XSMALL_SALES_USAGE_GRANT" {
-  warehouse_name = "WH_XSMALL_SALES"
+  warehouse_name = snowflake_warehouse.WH_XSMALL_SALES.name
   privilege      = "USAGE"
 
   roles = [
-    "RL_SALES",
+    snowflake_role.RL_SALES.name,
   ]
 
   with_grant_option = false
 }
 
 resource snowflake_schema_grant "SCHEMA_SALES_USAGE_GRANT" {
-  database_name = "TEST_TERRAFORM_DB"
-  schema_name   = "SALES"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
+  schema_name   = snowflake_schema.SALES.name
 
   privilege = "USAGE"
-  roles     = ["RL_SALES"]
+  roles     = [snowflake_role.RL_SALES.name]
 
   with_grant_option = false
 }
 
 resource snowflake_table_grant TBL_EMPLOYEES_SELECT_GRANT {
-  database_name = "TEST_TERRAFORM_DB"
-  schema_name   = "SALES"
-  table_name    = "EMPLOYEES"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
+  schema_name   = snowflake_schema.SALES.name
+  table_name    = snowflake_table.TBL_EMPLOYEES.name
 
   privilege = "SELECT"
-  roles     = ["RL_SALES"]
+  roles     = [snowflake_role.RL_SALES.name]
 
   with_grant_option = false
 }
 
 resource snowflake_view_grant V_CURRENT_EMPLOYEES_SELECT_GRANT {
-  database_name = "TEST_TERRAFORM_DB"
-  schema_name   = "SALES"
-  view_name     = "CURRENT_EMPLOYEES"
+  database_name = snowflake_database.TEST_TERRAFORM_DB.name
+  schema_name   = snowflake_schema.SALES.name
+  view_name     = snowflake_view.CURRENT_EMPLOYEES.name
 
   privilege = "SELECT"
   roles = [
-    "RL_SALES"
+    snowflake_role.RL_SALES.name
   ]
 
   with_grant_option = false
