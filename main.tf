@@ -9,10 +9,10 @@ terraform {
 
 provider "snowflake" {
   # Configuration options
-  username = "michael"
-  password = "F_DN9be9sK!jqKV4Xb"
-  account  = "jo55170.us-east-2.aws"
-  role     = "accountadmin"
+  username = var.snowflake_username
+  password = var.snowflake_password
+  account  = var.snowflake_account
+  role     = var.snowflake_role
 }
 
 resource snowflake_database TEST_TERRAFORM_DB {
