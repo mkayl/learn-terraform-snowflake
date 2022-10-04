@@ -78,7 +78,7 @@ resource snowflake_view AGG_FACEBOOK_ADS {
 SQL
 }
 
-resource "snowflake_table" "tbl_employees" {
+resource "snowflake_table" "TBL_EMPLOYEES" {
   database            = "TEST_TERRAFORM_DB"
   schema              = "SALES"
   name                = "EMPLOYEES"
@@ -156,6 +156,13 @@ resource snowflake_role RL_SALES {
   comment = "A role for all sales"
 }
 
+resource "snowflake_warehouse" WH_XSMALL_SALES {
+  name           = "WH_XSMALL_SALES"
+  comment        = "A x-small warehouse for the sales team."
+  warehouse_size = "x-small"
+  auto_suspend = 60
+}
+
 resource "snowflake_role_grants" "MARKETING_GRANTS" {
   role_name = "RL_MARKETING"
 
@@ -228,6 +235,65 @@ resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
   privilege = "SELECT"
   roles = [
     "RL_MARKETING"
+  ]
+
+  with_grant_option = false
+}
+
+
+
+resource "snowflake_role_grants" "SALES_GRANTS" {
+  role_name = "RL_SALES"
+
+  roles = [
+    "ACCOUNTADMIN"
+  ]
+
+  users = [
+    "TEST_TERRAFORM_USER_1"
+  ]
+}
+
+resource snowflake_warehouse_grant "WH_XSMALL_SALES_USAGE_GRANT" {
+  warehouse_name = "WH_XSMALL_SALES"
+  privilege      = "USAGE"
+
+  roles = [
+    "RL_SALES",
+  ]
+
+  with_grant_option = false
+}
+
+resource snowflake_schema_grant "SCHEMA_SALES_USAGE_GRANT" {
+  database_name = "TEST_TERRAFORM_DB"
+  schema_name   = "SALES"
+
+  privilege = "USAGE"
+  roles     = ["RL_SALES"]
+
+  with_grant_option = false
+}
+
+resource snowflake_table_grant TBL_EMPLOYEES_SELECT_GRANT {
+  database_name = "TEST_TERRAFORM_DB"
+  schema_name   = "SALES"
+  table_name    = "EMPLOYEES"
+
+  privilege = "SELECT"
+  roles     = ["RL_SALES"]
+
+  with_grant_option = false
+}
+
+resource snowflake_view_grant V_CURRENT_EMPLOYEES_SELECT_GRANT {
+  database_name = "TEST_TERRAFORM_DB"
+  schema_name   = "SALES"
+  view_name     = "CURRENT_EMPLOYEES"
+
+  privilege = "SELECT"
+  roles = [
+    "RL_SALES"
   ]
 
   with_grant_option = false
