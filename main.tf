@@ -50,7 +50,7 @@ resource "snowflake_table" "FACEBOOK_ADS" {
 
   column {
     name     = "AD_NAME"
-    type     = "VARCHAR(16777216)"
+    type     = "VARCHAR"
     nullable = false
   }
 
@@ -93,7 +93,7 @@ resource "snowflake_table" "tbl_employees" {
 
   column {
     name     = "NAME"
-    type     = "VARCHAR(16777216)"
+    type     = "VARCHAR"
     nullable = false
   }
 
@@ -154,4 +154,81 @@ resource snowflake_warehouse WH_MEDIUM_MARKETING {
 resource snowflake_role RL_SALES {
   name    = "RL_SALES"
   comment = "A role for all sales"
+}
+
+resource "snowflake_role_grants" "MARKETING_GRANTS" {
+  role_name = "RL_MARKETING"
+
+  roles = [
+    "ACCOUNTADMIN"
+  ]
+
+  users = [
+    "TEST_TERRAFORM_USER_1"
+  ]
+}
+
+resource snowflake_warehouse_grant "WH_XSMALL_MARKETING_USAGE_GRANT" {
+  warehouse_name = "WH_XSMALL_MARKETING"
+  privilege      = "USAGE"
+
+  roles = [
+    "RL_MARKETING",
+  ]
+
+  with_grant_option = false
+}
+
+resource snowflake_warehouse_grant "WH_MEDIUM_MARKETING_USAGE_GRANT" {
+  warehouse_name = "WH_MEDIUM_MARKETING"
+  privilege      = "USAGE"
+
+  roles = [
+    "RL_MARKETING",
+  ]
+
+  with_grant_option = false
+}
+
+resource snowflake_database_grant "TEST_TERRAFORM_DB_GRANT" {
+  database_name = "TEST_TERRAFORM_DB"
+
+  privilege = "USAGE"
+  roles     = ["RL_MARKETING", "RL_SALES"]
+
+  with_grant_option = false
+}
+
+resource snowflake_schema_grant "ADS_USAGE_GRANT" {
+  database_name = "TEST_TERRAFORM_DB"
+  schema_name   = "ADS"
+
+  privilege = "USAGE"
+  roles     = ["RL_MARKETING"]
+
+  with_grant_option = false
+}
+
+resource snowflake_table_grant FACEBOOK_ADS_SELECT_GRANT {
+  database_name = "TEST_TERRAFORM_DB"
+  schema_name   = "ADS"
+  table_name    = "FACEBOOK_ADS"
+
+  privilege = "SELECT"
+  roles     = ["RL_MARKETING"]
+
+  with_grant_option = false
+}
+
+resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
+  database_name = "TEST_TERRAFORM_DB"
+  schema_name   = "ADS"
+  view_name     = "AGG_FACEBOOK_ADS"
+
+  privilege = "SELECT"
+  roles = [
+    "RL_MARKETING"
+  ]
+
+  with_grant_option = false
 }
