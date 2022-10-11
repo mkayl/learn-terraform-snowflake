@@ -308,3 +308,23 @@ module "ALL_USERS" {
     "TEST_TERRAFORM_USER_4": {"name" = "TEST_TERRAFORM_USER_4", "first_name" = "test_firstname 4", "last_name" = "test_lastname 4", "email" = "user4@snowflake.example", "display_name" = "Snowflake User 4"},
   }
 }
+
+module "DB_MARKETING" {
+  source = "./database"
+  db_name = "DB_MARKETING"
+  db_comment = "A database for the marketing team"
+  db_data_retention_time_in_days = 1
+  db_role_grants = {
+    "OWNERSHIP" = [snowflake_role.RL_MARKETING.name],
+    "USAGE" = [snowflake_role.RL_SALES.name]
+  }
+  schemas = ["FACEBOOK", "TWITTER"]
+
+  schema_grants = {
+    "FACEBOOK OWNERSHIP": {"schema" = "FACEBOOK", "privilege" = "OWNERSHIP", "roles" = [snowflake_role.RL_MARKETING.name]},
+    "FACEBOOK USAGE": {"schema" = "FACEBOOK", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
+    "TWITTER OWNERSHIP": {"schema" = "TWITTER", "privilege" = "OWNERSHIP", "roles" = [snowflake_role.RL_MARKETING.name]},
+    "TWITTER USAGE": {"schema" = "TWITTER", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
+    "TWITTER CREATE FUNCTION": {"schema" = "TWITTER", "privilege" = "CREATE FUNCTION", "roles" = [snowflake_role.RL_SALES.name]}
+  }
+}
