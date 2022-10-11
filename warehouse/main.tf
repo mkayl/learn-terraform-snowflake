@@ -22,3 +22,7 @@ resource "snowflake_warehouse_grant" "WAREHOUSE_GRANT" {
   roles = each.value
   with_grant_option = var.with_grant_option
 }
+
+output "WAREHOUSE" {
+    value = snowflake_warehouse.WAREHOUSE
+}
