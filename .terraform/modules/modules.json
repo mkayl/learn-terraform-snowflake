@@ -1,1 +1,1 @@
-{"Modules":[{"Key":"WH_SMALL_MARKETING","Source":"./warehouse","Dir":"warehouse"},{"Key":"","Source":"","Dir":"."}]}
+{"Modules":[{"Key":"WH_SMALL_MARKETING","Source":"./warehouse","Dir":"warehouse"},{"Key":"","Source":"","Dir":"."},{"Key":"all_users","Source":"./users","Dir":"users"},{"Key":"ALL_USERS","Source":"./users","Dir":"users"}]}

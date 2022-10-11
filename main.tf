@@ -121,17 +121,6 @@ resource snowflake_database TEST_TERRAFORM_DB_2 {
   data_retention_time_in_days = 1
 }
 
-resource snowflake_user TEST_TERRAFORM_USER_1 {
-  name         = "TEST_TERRAFORM_USER_1"
-  login_name   = "TEST_TERRAFORM_USER_1"
-  password     = "secret"
-  disabled     = false
-  display_name = "Snowflake User"
-
-  default_warehouse = snowflake_warehouse.WH_XSMALL_MARKETING.name
-  default_role      = "public"
-}
-
 resource snowflake_role RL_MARKETING {
   name    = "RL_MARKETING"
   comment = "A role for some marketers"
@@ -183,7 +172,7 @@ resource "snowflake_role_grants" "MARKETING_GRANTS" {
   ]
 
   users = [
-    snowflake_user.TEST_TERRAFORM_USER_1.name
+    module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name
   ]
 }
 
@@ -262,7 +251,7 @@ resource "snowflake_role_grants" "SALES_GRANTS" {
   ]
 
   users = [
-    snowflake_user.TEST_TERRAFORM_USER_1.name
+    module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name
   ]
 }
 
@@ -309,4 +298,18 @@ resource snowflake_view_grant V_CURRENT_EMPLOYEES_SELECT_GRANT {
   ]
 
   with_grant_option = false
+}
+
+module "ALL_USERS" {
+  source = "./users"
+  user_map = {
+    "TEST_TERRAFORM_USER_1": {"name" = "TEST_TERRAFORM_USER_1", "first_name" = "test_firstname 1", "last_name" = "test_lastname 1", "email" = "user1@snowflake.example", "display_name" = "Snowflake User 1", "default_warehouse": snowflake_warehouse.WH_XSMALL_MARKETING.name, "default_role" = "public"},
+    "TEST_TERRAFORM_USER_3": {"name" = "TEST_TERRAFORM_USER_3", "first_name" = "test_firstname 3", "last_name" = "test_lastname 3", "email" = "user3@snowflake.example", "display_name" = "Snowflake User 3", "default_warehouse":  snowflake_warehouse.WH_XSMALL_MARKETING.name, "default_role": "public"},
+    "TEST_TERRAFORM_USER_4": {"name" = "TEST_TERRAFORM_USER_4", "first_name" = "test_firstname 4", "last_name" = "test_lastname 4", "email" = "user4@snowflake.example", "display_name" = "Snowflake User 4"},
+  }
+}
+
+output "ALL_USERS" {
+  value = module.ALL_USERS
+  sensitive = true
 }
