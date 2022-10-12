@@ -145,6 +145,17 @@ module WH_SMALL_MARKETING {
   with_grant_option = false
 }
 
+module COMPUTE_WH {
+  source = "./warehouse"
+  warehouse_name = "COMPUTE_WH"
+  warehouse_comment = "Default warehouse."
+  warehouse_size = "XSMALL"
+  role_grants = {
+    "OWNERSHIP" = ["SYSADMIN"],
+    "USAGE" = [snowflake_role.RL_MARKETING.name]
+  }
+}
+
 resource snowflake_warehouse WH_MEDIUM_MARKETING {
   name           = "WH_MEDIUM_MARKETING"
   comment        = "A medium warehouse for the marketing team."
