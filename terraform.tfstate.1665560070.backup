@@ -1,7 +1,7 @@
 {
   "version": 4,
   "terraform_version": "1.2.9",
-  "serial": 268,
+  "serial": 258,
   "lineage": "5e045428-9c5d-6989-bf10-a2c711da6b04",
   "outputs": {},
   "resources": [
@@ -73,6 +73,24 @@
             "snowflake_role.RL_MARKETING",
             "snowflake_role.RL_SALES"
           ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "snowflake_role",
+      "name": "PUBLIC",
+      "provider": "provider[\"registry.terraform.io/chanzuckerberg/snowflake\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "comment": "Default role shipped with Snowflake",
+            "id": "PUBLIC",
+            "name": "PUBLIC"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
         }
       ]
     },
@@ -746,34 +764,6 @@
       "name": "USERS",
       "provider": "provider[\"registry.terraform.io/chanzuckerberg/snowflake\"]",
       "instances": [
-        {
-          "index_key": "MICHAEL",
-          "schema_version": 0,
-          "attributes": {
-            "comment": "",
-            "default_namespace": "",
-            "default_role": "ACCOUNTADMIN",
-            "default_warehouse": "WH_SMALL_MARKETING",
-            "disabled": false,
-            "display_name": "Michael Wyss",
-            "email": "mc.wyss@gmail.com",
-            "first_name": "Michael",
-            "has_rsa_public_key": false,
-            "id": "MICHAEL",
-            "last_name": "Wyss",
-            "login_name": "MICHAEL",
-            "must_change_password": null,
-            "name": "MICHAEL",
-            "password": null,
-            "rsa_public_key": null,
-            "rsa_public_key_2": null
-          },
-          "sensitive_attributes": [],
-          "private": "bnVsbA==",
-          "dependencies": [
-            "module.WH_SMALL_MARKETING.snowflake_warehouse.WAREHOUSE"
-          ]
-        },
         {
           "index_key": "TEST_TERRAFORM_USER_1",
           "schema_version": 0,
