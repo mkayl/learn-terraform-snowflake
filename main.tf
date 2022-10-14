@@ -15,8 +15,6 @@ provider "snowflake" {
   role     = var.snowflake_role
 }
 
-
-
 resource "snowflake_table" "FACEBOOK_ADS" {
   database            = module.TEST_TERRAFORM_DB.DATABASE.name
   schema              = module.TEST_TERRAFORM_DB.SCHEMA["ADS"].name
@@ -103,11 +101,6 @@ resource snowflake_database TEST_TERRAFORM_DB_2 {
   data_retention_time_in_days = 1
 }
 
-resource snowflake_role RL_MARKETING {
-  name    = "RL_MARKETING"
-  comment = "A role for some marketers"
-}
-
 resource snowflake_warehouse WH_XSMALL_MARKETING {
   name           = "WH_XSMALL_MARKETING"
   comment        = "A x-small warehouse for the marketing team."
@@ -121,8 +114,8 @@ module WH_SMALL_MARKETING {
   warehouse_comment = "Small warehouse for marketers."
   warehouse_size = "SMALL"
   role_grants = {
-    "OWNERSHIP" = [snowflake_role.RL_MARKETING.name],
-    "USAGE" = [snowflake_role.RL_MARKETING.name]
+    "OWNERSHIP" = [module.RL_MARKETING.ROLE.name],
+    "USAGE" = [module.RL_MARKETING.ROLE.name]
   }
   with_grant_option = false
 }
@@ -134,7 +127,7 @@ module COMPUTE_WH {
   warehouse_size = "XSMALL"
   role_grants = {
     "OWNERSHIP" = ["SYSADMIN"],
-    "USAGE" = [snowflake_role.RL_MARKETING.name]
+    "USAGE" = [module.RL_MARKETING.ROLE.name]
   }
 }
 
@@ -145,11 +138,6 @@ resource snowflake_warehouse WH_MEDIUM_MARKETING {
   auto_suspend = 60
 }
 
-resource snowflake_role RL_SALES {
-  name    = "RL_SALES"
-  comment = "A role for all sales"
-}
-
 resource "snowflake_warehouse" WH_XSMALL_SALES {
   name           = "WH_XSMALL_SALES"
   comment        = "A x-small warehouse for the sales team."
@@ -157,24 +145,12 @@ resource "snowflake_warehouse" WH_XSMALL_SALES {
   auto_suspend = 60
 }
 
-resource "snowflake_role_grants" "MARKETING_GRANTS" {
-  role_name = snowflake_role.RL_MARKETING.name
-
-  roles = [
-    "ACCOUNTADMIN"
-  ]
-
-  users = [
-    module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name
-  ]
-}
-
 resource snowflake_warehouse_grant "WH_XSMALL_MARKETING_USAGE_GRANT" {
   warehouse_name = snowflake_warehouse.WH_XSMALL_MARKETING.name
   privilege      = "USAGE"
 
   roles = [
-    snowflake_role.RL_MARKETING.name,
+    module.RL_MARKETING.ROLE.name,
   ]
 
   with_grant_option = false
@@ -185,7 +161,7 @@ resource snowflake_warehouse_grant "WH_MEDIUM_MARKETING_USAGE_GRANT" {
   privilege      = "USAGE"
 
   roles = [
-    snowflake_role.RL_MARKETING.name,
+    module.RL_MARKETING.ROLE.name,
   ]
 
   with_grant_option = false
@@ -197,7 +173,7 @@ resource snowflake_table_grant FACEBOOK_ADS_SELECT_GRANT {
   table_name    = snowflake_table.FACEBOOK_ADS.name
 
   privilege = "SELECT"
-  roles     = [snowflake_role.RL_MARKETING.name]
+  roles     = [module.RL_MARKETING.ROLE.name]
 
   with_grant_option = false
 }
@@ -209,23 +185,10 @@ resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
 
   privilege = "SELECT"
   roles = [
-    snowflake_role.RL_MARKETING.name
+    module.RL_MARKETING.ROLE.name
   ]
 
   with_grant_option = false
-}
-
-
-resource "snowflake_role_grants" "SALES_GRANTS" {
-  role_name = snowflake_role.RL_SALES.name
-
-  roles = [
-    "ACCOUNTADMIN"
-  ]
-
-  users = [
-    module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name
-  ]
 }
 
 resource snowflake_warehouse_grant "WH_XSMALL_SALES_USAGE_GRANT" {
@@ -233,7 +196,7 @@ resource snowflake_warehouse_grant "WH_XSMALL_SALES_USAGE_GRANT" {
   privilege      = "USAGE"
 
   roles = [
-    snowflake_role.RL_SALES.name,
+    module.RL_SALES.ROLE.name,
   ]
 
   with_grant_option = false
@@ -245,7 +208,7 @@ resource snowflake_table_grant TBL_EMPLOYEES_SELECT_GRANT {
   table_name    = snowflake_table.TBL_EMPLOYEES.name
 
   privilege = "SELECT"
-  roles     = [snowflake_role.RL_SALES.name]
+  roles     = [module.RL_SALES.ROLE.name]
 
   with_grant_option = false
 }
@@ -257,7 +220,7 @@ resource snowflake_view_grant V_CURRENT_EMPLOYEES_SELECT_GRANT {
 
   privilege = "SELECT"
   roles = [
-    snowflake_role.RL_SALES.name
+    module.RL_SALES.ROLE.name
   ]
 
   with_grant_option = false
@@ -279,17 +242,17 @@ module "DB_MARKETING" {
   db_comment = "A database for the marketing team"
   db_data_retention_time_in_days = 1
   db_role_grants = {
-    "OWNERSHIP" = [snowflake_role.RL_MARKETING.name],
-    "USAGE" = [snowflake_role.RL_SALES.name]
+    "OWNERSHIP" = [module.RL_MARKETING.ROLE.name],
+    "USAGE" = [module.RL_SALES.ROLE.name]
   }
   schemas = ["FACEBOOK", "TWITTER"]
 
   schema_grants = {
-    "FACEBOOK OWNERSHIP": {"schema" = "FACEBOOK", "privilege" = "OWNERSHIP", "roles" = [snowflake_role.RL_MARKETING.name]},
-    "FACEBOOK USAGE": {"schema" = "FACEBOOK", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
-    "TWITTER OWNERSHIP": {"schema" = "TWITTER", "privilege" = "OWNERSHIP", "roles" = [snowflake_role.RL_MARKETING.name]},
-    "TWITTER USAGE": {"schema" = "TWITTER", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
-    "TWITTER CREATE FUNCTION": {"schema" = "TWITTER", "privilege" = "CREATE FUNCTION", "roles" = [snowflake_role.RL_SALES.name]}
+    "FACEBOOK OWNERSHIP": {"schema" = "FACEBOOK", "privilege" = "OWNERSHIP", "roles" = [module.RL_MARKETING.ROLE.name]},
+    "FACEBOOK USAGE": {"schema" = "FACEBOOK", "privilege" = "USAGE", "roles" = [module.RL_SALES.ROLE.name]},
+    "TWITTER OWNERSHIP": {"schema" = "TWITTER", "privilege" = "OWNERSHIP", "roles" = [module.RL_MARKETING.ROLE.name]},
+    "TWITTER USAGE": {"schema" = "TWITTER", "privilege" = "USAGE", "roles" = [module.RL_SALES.ROLE.name]},
+    "TWITTER CREATE FUNCTION": {"schema" = "TWITTER", "privilege" = "CREATE FUNCTION", "roles" = [module.RL_SALES.ROLE.name]}
   }
 }
 
@@ -299,12 +262,28 @@ module "TEST_TERRAFORM_DB" {
   db_comment = "my first terraform database"
   db_data_retention_time_in_days = 1
   db_role_grants = {
-    "USAGE" = [snowflake_role.RL_MARKETING.name, snowflake_role.RL_SALES.name]
+    "USAGE" = [module.RL_MARKETING.ROLE.name, module.RL_SALES.ROLE.name]
   }
   schemas = ["ADS", "SALES"]
 
   schema_grants = {
-    "ADS USAGE": {"schema" = "ADS", "privilege" = "USAGE", "roles" = [snowflake_role.RL_MARKETING.name]},
-    "SALES USAGE": {"schema" = "SALES", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
+    "ADS USAGE": {"schema" = "ADS", "privilege" = "USAGE", "roles" = [module.RL_MARKETING.ROLE.name]},
+    "SALES USAGE": {"schema" = "SALES", "privilege" = "USAGE", "roles" = [module.RL_SALES.ROLE.name]},
   }
+}
+
+module "RL_MARKETING" {
+  source = "./roles"
+  name = "RL_MARKETING"
+  comment = "a read only role for marketers"
+  role_names = ["ACCOUNTADMIN"]
+  user_names = [module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name]
+}
+
+module "RL_SALES" {
+  source = "./roles"
+  name = "RL_SALES"
+  comment = "A role for all sales"
+  role_names = ["ACCOUNTADMIN"]
+  user_names = [module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name]
 }
