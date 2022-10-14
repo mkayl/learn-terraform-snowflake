@@ -15,29 +15,11 @@ provider "snowflake" {
   role     = var.snowflake_role
 }
 
-resource snowflake_database TEST_TERRAFORM_DB {
-  name = "TEST_TERRAFORM_DB"
-  comment = "my first terraform database"
-  data_retention_time_in_days = 1
-}
 
-resource snowflake_schema ADS {
-  database = snowflake_database.TEST_TERRAFORM_DB.name
-  name = "ADS"
-  comment = "A schema for understanding ads thet were run"
-  data_retention_days = 1
-}
-
-resource snowflake_schema SALES {
-  database = snowflake_database.TEST_TERRAFORM_DB.name
-  name = "SALES"
-  comment = "A schema for understanding ads thet were run"
-  data_retention_days = 1
-}
 
 resource "snowflake_table" "FACEBOOK_ADS" {
-  database            = snowflake_database.TEST_TERRAFORM_DB.name
-  schema              = snowflake_schema.ADS.name
+  database            = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema              = module.TEST_TERRAFORM_DB.SCHEMA["ADS"].name
   name                = "FACEBOOK_ADS"
   comment             = "Table to track ads success."
   data_retention_days = 1
@@ -67,8 +49,8 @@ resource "snowflake_table" "FACEBOOK_ADS" {
 }
 
 resource snowflake_view AGG_FACEBOOK_ADS {
-  database = snowflake_database.TEST_TERRAFORM_DB.name
-  schema   = snowflake_schema.ADS.name
+  database            = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema              = module.TEST_TERRAFORM_DB.SCHEMA["ADS"].name
   name     = "AGG_FACEBOOK_ADS"
 
   comment = "Aggregated facebook ads by date"
@@ -79,8 +61,8 @@ SQL
 }
 
 resource "snowflake_table" "TBL_EMPLOYEES" {
-  database            = snowflake_database.TEST_TERRAFORM_DB.name
-  schema              = snowflake_schema.SALES.name
+  database            = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema              = module.TEST_TERRAFORM_DB.SCHEMA["SALES"].name
   name                = "EMPLOYEES"
   comment             = "Table containing all employees."
   data_retention_days = 1
@@ -104,8 +86,8 @@ resource "snowflake_table" "TBL_EMPLOYEES" {
 }
 
 resource snowflake_view CURRENT_EMPLOYEES {
-  database = snowflake_database.TEST_TERRAFORM_DB.name
-  schema   = snowflake_schema.SALES.name
+  database = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema  = module.TEST_TERRAFORM_DB.SCHEMA["SALES"].name
   name     = "CURRENT_EMPLOYEES"
 
   comment = "Returns all current employees"
@@ -209,28 +191,9 @@ resource snowflake_warehouse_grant "WH_MEDIUM_MARKETING_USAGE_GRANT" {
   with_grant_option = false
 }
 
-resource snowflake_database_grant "TEST_TERRAFORM_DB_GRANT" {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-
-  privilege = "USAGE"
-  roles     = [snowflake_role.RL_MARKETING.name, snowflake_role.RL_SALES.name]
-
-  with_grant_option = false
-}
-
-resource snowflake_schema_grant "ADS_USAGE_GRANT" {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-  schema_name   = snowflake_schema.ADS.name
-
-  privilege = "USAGE"
-  roles     = [snowflake_role.RL_MARKETING.name]
-
-  with_grant_option = false
-}
-
 resource snowflake_table_grant FACEBOOK_ADS_SELECT_GRANT {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-  schema_name   = snowflake_schema.ADS.name
+  database_name = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema_name = module.TEST_TERRAFORM_DB.SCHEMA["ADS"].name
   table_name    = snowflake_table.FACEBOOK_ADS.name
 
   privilege = "SELECT"
@@ -240,8 +203,8 @@ resource snowflake_table_grant FACEBOOK_ADS_SELECT_GRANT {
 }
 
 resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-  schema_name   = snowflake_schema.ADS.name
+  database_name = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema_name = module.TEST_TERRAFORM_DB.SCHEMA["ADS"].name
   view_name     = snowflake_view.AGG_FACEBOOK_ADS.name
 
   privilege = "SELECT"
@@ -251,7 +214,6 @@ resource snowflake_view_grant AGG_FACEBOOK_ADS_SELECT_GRANT {
 
   with_grant_option = false
 }
-
 
 
 resource "snowflake_role_grants" "SALES_GRANTS" {
@@ -277,19 +239,9 @@ resource snowflake_warehouse_grant "WH_XSMALL_SALES_USAGE_GRANT" {
   with_grant_option = false
 }
 
-resource snowflake_schema_grant "SCHEMA_SALES_USAGE_GRANT" {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-  schema_name   = snowflake_schema.SALES.name
-
-  privilege = "USAGE"
-  roles     = [snowflake_role.RL_SALES.name]
-
-  with_grant_option = false
-}
-
 resource snowflake_table_grant TBL_EMPLOYEES_SELECT_GRANT {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-  schema_name   = snowflake_schema.SALES.name
+  database_name = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema_name = module.TEST_TERRAFORM_DB.SCHEMA["SALES"].name
   table_name    = snowflake_table.TBL_EMPLOYEES.name
 
   privilege = "SELECT"
@@ -299,8 +251,8 @@ resource snowflake_table_grant TBL_EMPLOYEES_SELECT_GRANT {
 }
 
 resource snowflake_view_grant V_CURRENT_EMPLOYEES_SELECT_GRANT {
-  database_name = snowflake_database.TEST_TERRAFORM_DB.name
-  schema_name   = snowflake_schema.SALES.name
+  database_name = module.TEST_TERRAFORM_DB.DATABASE.name
+  schema_name = module.TEST_TERRAFORM_DB.SCHEMA["SALES"].name
   view_name     = snowflake_view.CURRENT_EMPLOYEES.name
 
   privilege = "SELECT"
@@ -338,5 +290,21 @@ module "DB_MARKETING" {
     "TWITTER OWNERSHIP": {"schema" = "TWITTER", "privilege" = "OWNERSHIP", "roles" = [snowflake_role.RL_MARKETING.name]},
     "TWITTER USAGE": {"schema" = "TWITTER", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
     "TWITTER CREATE FUNCTION": {"schema" = "TWITTER", "privilege" = "CREATE FUNCTION", "roles" = [snowflake_role.RL_SALES.name]}
+  }
+}
+
+module "TEST_TERRAFORM_DB" {
+  source = "./database"
+  db_name = "TEST_TERRAFORM_DB"
+  db_comment = "my first terraform database"
+  db_data_retention_time_in_days = 1
+  db_role_grants = {
+    "USAGE" = [snowflake_role.RL_MARKETING.name, snowflake_role.RL_SALES.name]
+  }
+  schemas = ["ADS", "SALES"]
+
+  schema_grants = {
+    "ADS USAGE": {"schema" = "ADS", "privilege" = "USAGE", "roles" = [snowflake_role.RL_MARKETING.name]},
+    "SALES USAGE": {"schema" = "SALES", "privilege" = "USAGE", "roles" = [snowflake_role.RL_SALES.name]},
   }
 }
