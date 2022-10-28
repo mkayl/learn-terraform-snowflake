@@ -1,4 +1,13 @@
 terraform {
+  cloud {
+    organization = "example-org-8f2301"
+    workspaces {
+      name = "learn-terraform-snowflake"
+    }
+  }
+}
+
+terraform {
   required_providers {
     snowflake = {
       source  = "chanzuckerberg/snowflake"
