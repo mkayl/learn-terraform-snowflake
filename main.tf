@@ -233,7 +233,13 @@ module "ALL_USERS" {
     "TEST_TERRAFORM_USER_3": {"name" = "TEST_TERRAFORM_USER_3", "first_name" = "test_firstname 3", "last_name" = "test_lastname 3", "email" = "user3@snowflake.example", "display_name" = "Snowflake User 3", "default_warehouse":  module.WH_SMALL_MARKETING.WAREHOUSE.name, "default_role": "public"},
     "TEST_TERRAFORM_USER_4": {"name" = "TEST_TERRAFORM_USER_4", "first_name" = "test_firstname 4", "last_name" = "test_lastname 4", "email" = "user4@snowflake.example", "display_name" = "Snowflake User 4"},
     "MICHAEL": {"name" = "MICHAEL", "first_name" = "Michael", "last_name" = "Wyss", "email" = "mc.wyss@gmail.com", "display_name" = "Michael Wyss", "default_warehouse":  module.WH_SMALL_MARKETING.WAREHOUSE.name, "default_role": "ACCOUNTADMIN"},
+    "TERRAFORM": {"name" = "TERRAFORM", "first_name" = "", "last_name" = "", "email" = "", "display_name" = "Terraform", "default_warehouse":  module.WH_SMALL_MARKETING.WAREHOUSE.name, "default_role": "ACCOUNTADMIN"},
   }
+}
+
+resource "snowflake_role_grants" "ACCOUNTADMIN_ROLE_GRANTS" {
+  role_name = "ACCOUNTADMIN"
+  users = [module.ALL_USERS.USERS["TERRAFORM"].name, module.ALL_USERS.USERS["MICHAEL"].name]
 }
 
 module "DB_MARKETING" {
