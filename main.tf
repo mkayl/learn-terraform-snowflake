@@ -287,3 +287,17 @@ module "RL_SALES" {
   role_names = ["ACCOUNTADMIN"]
   user_names = [module.ALL_USERS.USERS.TEST_TERRAFORM_USER_1.name]
 }
+
+# module "TEST_DB_ADS_AD_NAME_MASK" {
+#   source = "./masking_policy"
+#   name = "AD_NAME_MASK"
+#   database_name = module.TEST_TERRAFORM_DB.DATABASE.name
+#   schema_name = module.TEST_TERRAFORM_DB.SCHEMA.ADS.name
+#   data_type = "string"
+#   masking_expression = "case when is_role_in_session('RL_MARKETING') then val else sha2(val) end"
+#   masking_grants = {
+#     "OWNERSHIP" = ["ACCOUNTADMIN"],
+#     "APPLY" = [module.RL_MARKETING.ROLE.name]
+#   }
+# }
+
